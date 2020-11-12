@@ -1,6 +1,6 @@
 window.appAPI = {
   dev:{
-    server:'dev-http-url'
+    server:'http://localhost:8080'
   },
   prod:{
     server:'prod-http-url'

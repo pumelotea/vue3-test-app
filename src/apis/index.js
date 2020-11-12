@@ -20,6 +20,7 @@ export function $post(url, params) {
       .post(url, params)
       .then(
         res => {
+          console.log(res)
           resolve(res.data)
         },
         err => {
