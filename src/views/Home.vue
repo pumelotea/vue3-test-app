@@ -6,16 +6,23 @@
 </template>
 
 <script lang="ts">
+import DemoCom from "@/components/DemoCom.vue"
+
 import {defineComponent} from 'vue'
-import DemoCom from "../components/DemoCom.vue"
 // eslint-disable-next-line no-unused-vars
-import {onMounted,getCurrentInstance} from 'vue'
+import {onMounted, getCurrentInstance,reactive} from 'vue'
+
 export default defineComponent({
   name: "Home",
-  components:{
+  components: {
     DemoCom
   },
-  setup(){
+  setup() {
+    const self = getCurrentInstance()
+    console.log(self)
+    onMounted(async ()=>{
+      await (self as any).ctx.$api.login("123123","123123")
+    })
   }
 })
 </script>
