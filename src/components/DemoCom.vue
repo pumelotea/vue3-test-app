@@ -2,10 +2,14 @@
   <div>DemoCom</div>
 </template>
 
-<script>
-export default {
-  name: "DemoCom"
-}
+<script lang="ts">
+import {defineComponent} from 'vue';
+
+export default defineComponent(
+  {
+    name: "DemoCom"
+  }
+)
 </script>
 
 <style scoped>

@@ -1,4 +1,6 @@
-const routes = [
+import {RouteRecordRaw} from "vue-router";
+
+const routes:Array<RouteRecordRaw> = [
   {
     path:'/',
     component:()=>import('@/App.vue'),
@@ -12,12 +14,12 @@ const routes = [
   }
 ]
 
-export const beforeEachHandler = (to, from, next)=>{
+export const beforeEachHandler = (to:any, from:any, next:any)=>{
   next()
 }
 
 // eslint-disable-next-line no-unused-vars
-export const afterEachHandler = (to, from) => {}
+export const afterEachHandler = (to:any, from:any) => {}
 
 
 export default routes

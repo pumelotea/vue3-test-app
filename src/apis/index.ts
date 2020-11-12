@@ -1,6 +1,7 @@
 import axios from 'axios'
 import axiosConfig from "@/apis/config";
 import apiDefinition from "@/apis/definition";
+import {App} from 'vue'
 import {
   requestInterceptor,
   responseInterceptor,
@@ -14,7 +15,7 @@ httpClient.interceptors.request.use(requestInterceptor,requestErrorHandler)
 httpClient.interceptors.response.use(responseInterceptor,responseErrorHandler)
 
 
-export function $post(url, params) {
+export function $post(url:string, params:any) {
   return new Promise((resolve, reject) => {
     httpClient
       .post(url, params)
@@ -33,7 +34,7 @@ export function $post(url, params) {
   })
 }
 
-export function $get(url, params) {
+export function $get(url:string, params:any) {
   return new Promise((resolve, reject) => {
     httpClient
       .get(url, {
@@ -48,7 +49,7 @@ export function $get(url, params) {
   })
 }
 
-export function $delete(url, params) {
+export function $delete(url:string, params:any) {
   return new Promise((resolve, reject) => {
     httpClient
       .delete(url, { params: params })
@@ -66,7 +67,7 @@ export function $delete(url, params) {
   })
 }
 
-export function $put(url, params) {
+export function $put(url:string, params:any) {
   return new Promise((resolve, reject) => {
     httpClient
       .put(url, params)
@@ -81,10 +82,9 @@ export function $put(url, params) {
 
 const http = {
   // eslint-disable-next-line no-unused-vars
-  install(app,options){
+  install(app:App,options:any){
     app.config.globalProperties.$http = httpClient
     app.config.globalProperties.$api = this
-
   },
   ...apiDefinition
 }

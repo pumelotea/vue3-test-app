@@ -5,18 +5,19 @@
   </div>
 </template>
 
-<script lang="">
-import DemoCom from "@/components/DemoCom"
+<script lang="ts">
+import {defineComponent} from 'vue'
+import DemoCom from "../components/DemoCom.vue"
 // eslint-disable-next-line no-unused-vars
 import {onMounted,getCurrentInstance} from 'vue'
-export default {
+export default defineComponent({
   name: "Home",
   components:{
     DemoCom
   },
   setup(){
   }
-}
+})
 </script>
 
 <style scoped>
