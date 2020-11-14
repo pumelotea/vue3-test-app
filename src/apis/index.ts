@@ -1,21 +1,21 @@
 import axios from 'axios'
-import axiosConfig from "@/apis/config";
-import apiDefinition from "@/apis/definition";
-import {App} from 'vue'
+import axiosConfig from '@/apis/config'
+import apiDefinition from '@/apis/definition'
+import { App } from 'vue'
 import {
   requestInterceptor,
   responseInterceptor,
   requestErrorHandler,
   responseErrorHandler
-} from "@/apis/config";
+} from '@/apis/config'
 
 //创建http请求客户端
 export const httpClient = axios.create(axiosConfig)
-httpClient.interceptors.request.use(requestInterceptor,requestErrorHandler)
-httpClient.interceptors.response.use(responseInterceptor,responseErrorHandler)
+httpClient.interceptors.request.use(requestInterceptor, requestErrorHandler)
+httpClient.interceptors.response.use(responseInterceptor, responseErrorHandler)
 
 
-export function $post(url:string, params:any) {
+export function $post(url: string, params: any) {
   return new Promise((resolve, reject) => {
     httpClient
       .post(url, params)
@@ -34,7 +34,7 @@ export function $post(url:string, params:any) {
   })
 }
 
-export function $get(url:string, params:any) {
+export function $get(url: string, params: any) {
   return new Promise((resolve, reject) => {
     httpClient
       .get(url, {
@@ -49,7 +49,7 @@ export function $get(url:string, params:any) {
   })
 }
 
-export function $delete(url:string, params:any) {
+export function $delete(url: string, params: any) {
   return new Promise((resolve, reject) => {
     httpClient
       .delete(url, { params: params })
@@ -67,7 +67,7 @@ export function $delete(url:string, params:any) {
   })
 }
 
-export function $put(url:string, params:any) {
+export function $put(url: string, params: any) {
   return new Promise((resolve, reject) => {
     httpClient
       .put(url, params)
@@ -82,11 +82,11 @@ export function $put(url:string, params:any) {
 
 const http = {
   // eslint-disable-next-line no-unused-vars
-  install(app:App,options:any){
+  install(app: App, options: any) {
     app.config.globalProperties.$http = httpClient
     app.config.globalProperties.$api = this
   },
   ...apiDefinition
 }
 
-export default http;
+export default http

@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from "@/router";
-import store from "@/store";
-import http from "@/apis";
+import router from '@/router'
+import store from '@/store'
+import http from '@/apis'
 
 const app = createApp(App)
 app.use(router)

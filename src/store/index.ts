@@ -1,7 +1,8 @@
 import { createStore } from 'vuex'
+
 const store = createStore({
-    state:{
-        a:'test'
-    }
+  state: {
+    a: 'test'
+  }
 })
 export default store
