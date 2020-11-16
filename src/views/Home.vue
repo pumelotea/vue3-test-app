@@ -1,7 +1,11 @@
 <template>
   <div>
     Home-{{data.sum}}
-    <demo-com @demo-click="addAction" :name="String(count)"></demo-com>
+    <demo-com @demo-click="addAction" :name="String(count)">
+        <template v-slot:default="{xxx}">
+          {{xxx}}
+        </template>
+    </demo-com>
     <div>
       <button @click="addAction">ADD {{count}}</button>
     </div>
@@ -21,7 +25,7 @@ export default defineComponent({
     DemoCom
   },
   setup() {
-    // const self = getCurrentInstance()
+    const self = getCurrentInstance()
     const count = ref(0)
     const data = reactive({
       sum: 0
@@ -31,11 +35,10 @@ export default defineComponent({
       console.log(event)
       count.value++
       data.sum += count.value
-
     }
 
     onMounted(async () => {
-      // await (self as any).ctx.$api.login("123123","123123")
+      await (self as any).ctx.$api.login("123123","123123")
     })
 
     return {

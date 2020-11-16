@@ -1,6 +1,7 @@
 <template>
   <div class="demo-com">
     <button @click="demoBtnClick">DemoCom</button>
+    <slot :xxx="name"></slot>
   </div>
 </template>
 
