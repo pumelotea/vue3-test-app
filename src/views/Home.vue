@@ -26,6 +26,7 @@ export default defineComponent({
   },
   setup() {
     const self = getCurrentInstance()
+    const ctx = (self as any).ctx
     const count = ref(0)
     const data = reactive({
       sum: 0
@@ -35,10 +36,13 @@ export default defineComponent({
       console.log(event)
       count.value++
       data.sum += count.value
+
+      ctx.$bus.emit('ok','asdjaksjdkjajskd')
     }
 
     onMounted(async () => {
-      await (self as any).ctx.$api.login("123123","123123")
+      ctx.$bus.on('ok',msg=>console.log(msg))
+      await ctx.$api.login("123123","123123")
     })
 
     return {
