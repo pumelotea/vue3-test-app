@@ -1,4 +1,4 @@
-export const deepClone = (source:any) => {
+export const deepClone = (source: any) => {
 
 }
 
@@ -7,29 +7,29 @@ export const deepClone = (source:any) => {
  * @param time
  * @param format  default {y}-{m}-{d} {h}:{i}:{s}
  */
-export const timeFormat = function(time:Date|string|number,format?:string):string {
+export const timeFormat = function(time: Date | string | number, format?: string): string {
   if (!time) {
     return ''
   }
   let date = null
-  if (time instanceof Date){
+  if (time instanceof Date) {
     date = time
-  }else if (typeof time === 'number'){
+  } else if (typeof time === 'number') {
     const len = ('' + time).length
-    if (len !=10 && len != 13){
+    if (len != 10 && len != 13) {
       return ''
     }
-    if (len === 10){
+    if (len === 10) {
       time = time * 1000
     }
     date = new Date(time)
-  }else {
+  } else {
     date = new Date(time)
   }
-  if (date.toString() === 'Invalid Date'){
-    return  ''
+  if (date.toString() === 'Invalid Date') {
+    return ''
   }
-  const formatObj:any = {
+  const formatObj: any = {
     y: date.getFullYear(),
     m: date.getMonth() + 1,
     d: date.getDate(),
