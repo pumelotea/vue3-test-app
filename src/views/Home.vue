@@ -14,6 +14,7 @@
 
 <script lang="ts">
 import DemoCom from '@/components/DemoCom.vue'
+import {timeFormat} from '@/common/utils'
 
 import { defineComponent } from 'vue'
 // eslint-disable-next-line no-unused-vars
@@ -41,8 +42,18 @@ export default defineComponent({
     }
 
     onMounted(async () => {
-      ctx.$bus.on('ok',msg=>console.log(msg))
-      await ctx.$api.login("123123","123123")
+      ctx.$bus.on('ok',(msg:any)=>console.log(msg))
+      // await ctx.$api.login("123123","123123")
+
+      let time = new Date()
+      console.log(timeFormat(time),'==========',time)
+      console.log(timeFormat(time.toDateString()),'==========',time.toDateString())
+      console.log(timeFormat(time.toISOString()),'==========',time.toISOString())
+      console.log(timeFormat(time.toLocaleDateString()),'==========',time.toLocaleDateString())
+      console.log(timeFormat(time.toLocaleString()),'==========',time.toLocaleString())
+      console.log(timeFormat(time.toTimeString()),'==========',time.toTimeString())
+      console.log(timeFormat(time.getTime()),'==========',time.getTime())
+      console.log(timeFormat(time.toString()),'==========',time.toString())
     })
 
     return {
