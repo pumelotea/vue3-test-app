@@ -14,7 +14,7 @@
 
 <script lang="ts">
 import DemoCom from '@/components/DemoCom.vue'
-import {timeFormat} from '@/common/utils'
+import {timeFormat,deepClone} from '@/common/utils'
 
 import { defineComponent } from 'vue'
 // eslint-disable-next-line no-unused-vars
@@ -54,6 +54,25 @@ export default defineComponent({
       console.log(timeFormat(time.toTimeString()),'==========',time.toTimeString())
       console.log(timeFormat(time.getTime()),'==========',time.getTime())
       console.log(timeFormat(time.toString()),'==========',time.toString())
+
+
+      let a = {
+        a:1,
+        b:2,
+        c:3,
+        d:{
+          a:{
+            d:'123'
+          }
+        }
+      }
+      const c = a
+      const b = deepClone(a)
+      console.log(b === a,c===a)
+      console.log(b)
+      console.log(a)
+      console.log(JSON.stringify(a) === JSON.stringify(b))
+
     })
 
     return {
