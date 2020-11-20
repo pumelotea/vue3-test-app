@@ -47,6 +47,8 @@ export default defineComponent({
 
       let time = new Date()
       console.log(timeFormat(time),'==========',time)
+      console.log(timeFormat('2020/11/18 10:37:51'),'==========','2020/11/18 10:37:51')
+      console.log(timeFormat('2020-11-18 10:37:51'),'==========','2020-11-18 10:37:51')
       console.log(timeFormat(time.toDateString()),'==========',time.toDateString())
       console.log(timeFormat(time.toISOString()),'==========',time.toISOString())
       console.log(timeFormat(time.toLocaleDateString()),'==========',time.toLocaleDateString())
