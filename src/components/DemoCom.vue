@@ -20,7 +20,6 @@ export default defineComponent(
         const demoBtnClick = () => {
           emit('demo-click', props.name)
         }
-
         return {
           demoBtnClick
         }
