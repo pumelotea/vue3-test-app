@@ -31,8 +31,8 @@ import { ref, reactive,toRaw } from 'vue'
 export default {
   name: 'index',
   setup() {
-    const width = 500
-    const height = 500
+    const width = 1000
+    const height = 1000
     const gridWidth = 10
     const gridHeight = 10
     const gridCountX = ref(width / gridWidth)
@@ -86,7 +86,6 @@ export default {
           snakeBody[i].posY = snakeBody[i-1].posY
         }
       }
-      console.log(snakeBody)
     }
 
 
@@ -159,12 +158,13 @@ export default {
 
 <style scoped>
 .game-wrap {
-  width: 500px;
-  height: 500px;
+  width: 1000px;
+  height: 1000px;
   background: black;
   position: fixed;
   left: 50%;
   transform: translate3d(-50%, 0, 0);
+  box-sizing: border-box;
 }
 
 .grid {
@@ -174,17 +174,38 @@ export default {
   left: 0;
   top: 0;
   background: white;
-  border: 1px solid #8c8c8c;
+  border: 1px solid #c3c2c2;
 }
 
 .food {
   background: dodgerblue;
   z-index: 999;
+  animation: bling 0.5s infinite;
+  border-radius: 2px;
+}
+
+.head {
+  background: dodgerblue;
+  z-index: 999;
+  animation: bling 0.5s infinite;
 }
 
 .snake {
   background: #ee151b;
   border: none;
   z-index: 999;
+  transition: all 200ms;
+
 }
+
+@keyframes bling
+{
+  from {
+    transform: scale(1.5);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
 </style>
