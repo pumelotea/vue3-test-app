@@ -1,5 +1,6 @@
 <template>
   <div class="game-wrap">
+
     <template v-for="x in gridCountX">
       <div class="grid" v-for="y in gridCountY"
            :style="{left:`${(x-1)*gridWidth}px`,top:`${(y-1)*gridHeight}px`}"></div>
@@ -20,19 +21,20 @@
          v-for="body in snakeBody"
          :style="{left:`${body.posX*gridWidth}px`,top:`${body.posY*gridHeight}px`}"
     ></div>
-
+    <div class="score-panel">
+      <div>吃食物:{{snakeBodyLength}}</div>
+    </div>
 
   </div>
 </template>
 
 <script lang="ts">
-import { ref, reactive,toRaw } from 'vue'
-
+import { ref, reactive,toRaw,computed } from 'vue'
+import {AStarFindPath,Point} from './AStarFindPath'
 export default {
-  name: 'index',
   setup() {
-    const width = 1000
-    const height = 1000
+    const width = 200
+    const height = 200
     const gridWidth = 10
     const gridHeight = 10
     const gridCountX = ref(width / gridWidth)
@@ -77,7 +79,6 @@ export default {
       }
 
       for (let i=snakeBody.length-1;i>=0;i--){
-        console.log(i)
         if (i===0){
           snakeBody[i].posX = shadowSnakeHead.posX
           snakeBody[i].posY = shadowSnakeHead.posY
@@ -120,25 +121,83 @@ export default {
     }
 
     const changeDirection = (event: any) => {
+      autoPlayV2()
       //  38
       //37  39
       //  40
       if (Math.abs(direction-event.keyCode)!==2){
         direction = event.keyCode
-        console.log('direction',direction)
       }
     }
 
+    const snakeBodyLength = computed(()=>{
+      return snakeBody.length
+    })
 
     createSnake()
     createFood()
 
-    setInterval(() => {
-      moveSnake()
 
-    }, 100)
+    //不考虑障碍物寻路
+    const autoPlay = () => {
+      const deltaX = snake.posX - food.posX
+      const deltaY = snake.posY - food.posY
+
+      shadowSnakeHead.posX = toRaw(snake).posX
+      shadowSnakeHead.posY = toRaw(snake).posY
+      if (Math.abs(deltaX)>0){
+        snake.posX -= deltaX>0? 1:-1
+
+      }else if (Math.abs(deltaY)>0){
+        snake.posY -= deltaY>0? 1:-1
+      }
+
+      const getFood = isGetFood()
+      if (getFood){
+        eatFood()
+        createFood()
+      }
+      refreshAllPos()
+    }
 
 
+
+    const autoPlayV2 = () => {
+      let aStarFinder = new AStarFindPath()
+      shadowSnakeHead.posX = toRaw(snake).posX
+      shadowSnakeHead.posY = toRaw(snake).posY
+
+      let obstruction:Array<Point> = []
+      obstruction.push(... snakeBody.map(e=>new Point(e.posX,e.posY)))
+      aStarFinder.initMaze(obstruction)
+      // console.log(aStarFinder.maze)
+      let res = aStarFinder.findPath(new Point(snake.posX,snake.posY),new Point(food.posX,food.posY),false)
+      console.log(res)
+      let pointList:Array<Point> = []
+      aStarFinder.flatResult(res as Point,pointList)
+      console.log(pointList)
+      for (let i=0;i<pointList.length&&i<2;i++){
+        snake.posX = pointList[i].X
+        snake.posY = pointList[i].Y
+      }
+
+      const getFood = isGetFood()
+      if (getFood){
+        eatFood()
+        createFood()
+      }
+      refreshAllPos()
+    }
+
+
+
+    // setInterval(() => {
+    //   autoPlay()
+    // }, 10)
+    //
+    // setInterval(() => {
+    //   moveSnake()
+    // }, 100)
 
     document.addEventListener('keydown', changeDirection)
 
@@ -150,7 +209,7 @@ export default {
       food,
       snake,
       snakeBody,
-      moveSnake
+      snakeBodyLength
     }
   }
 }
@@ -158,8 +217,8 @@ export default {
 
 <style scoped>
 .game-wrap {
-  width: 1000px;
-  height: 1000px;
+  width: 200px;
+  height:200px;
   background: black;
   position: fixed;
   left: 50%;
@@ -180,8 +239,9 @@ export default {
 .food {
   background: dodgerblue;
   z-index: 999;
-  animation: bling 0.5s infinite;
-  border-radius: 2px;
+  animation: bling 1s infinite;
+  border-radius: 50%;
+  border: none;
 }
 
 .head {
@@ -194,18 +254,25 @@ export default {
   background: #ee151b;
   border: none;
   z-index: 999;
-  transition: all 200ms;
-
+  /*transition: all 200ms;*/
 }
 
 @keyframes bling
 {
-  from {
-    transform: scale(1.5);
-  }
-  to {
+  0% {
     transform: scale(1);
   }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.score-panel{
+  position: fixed;
+  top: 810px;
 }
 
 </style>
