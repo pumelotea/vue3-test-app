@@ -64,6 +64,12 @@ export class AStarFindPath {
   }
 
   private canReachGrid(x:number,y:number):boolean {
+    // console.log(x,y,this.maze[x])
+
+    if (!this.maze[x]){
+      return false
+    }
+
     return this.maze[x][y] === 0
   }
 

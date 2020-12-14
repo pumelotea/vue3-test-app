@@ -48,8 +48,22 @@ export default {
     const createFood = () => {
       const posX = Math.floor(Math.random() * gridCountX.value)
       const posY = Math.floor(Math.random() * gridCountY.value)
-      food.posX = posX
-      food.posY = posY
+
+      const list = []
+
+      list.push(snake)
+      list.push(...snakeBody)
+
+      const exist = list.filter(e=>{
+        return e.posX == posX && e.posY == posY
+      }).length>0
+
+      if (exist) {
+        createFood()
+      } else{
+        food.posX = posX
+        food.posY = posY
+      }
     }
 
     const createSnake = () => {
@@ -172,10 +186,10 @@ export default {
       aStarFinder.initMaze(obstruction)
       // console.log(aStarFinder.maze)
       let res = aStarFinder.findPath(new Point(snake.posX,snake.posY),new Point(food.posX,food.posY),false)
-      console.log(res)
+      // console.log(res)
       let pointList:Array<Point> = []
       aStarFinder.flatResult(res as Point,pointList)
-      console.log(pointList)
+      // console.log(pointList)
       for (let i=0;i<pointList.length&&i<2;i++){
         snake.posX = pointList[i].X
         snake.posY = pointList[i].Y
@@ -191,9 +205,9 @@ export default {
 
 
 
-    // setInterval(() => {
-    //   autoPlay()
-    // }, 10)
+    setInterval(() => {
+      autoPlayV2()
+    }, 100)
     //
     // setInterval(() => {
     //   moveSnake()
