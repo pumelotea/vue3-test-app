@@ -33,8 +33,8 @@ import { ref, reactive,toRaw,computed } from 'vue'
 import {AStarFindPath,Point} from './AStarFindPath'
 export default {
   setup() {
-    const width = 200
-    const height = 200
+    const width = 400
+    const height = 400
     const gridWidth = 10
     const gridHeight = 10
     const gridCountX = ref(width / gridWidth)
@@ -207,7 +207,7 @@ export default {
 
     setInterval(() => {
       autoPlayV2()
-    }, 100)
+    }, 20)
     //
     // setInterval(() => {
     //   moveSnake()
@@ -231,8 +231,8 @@ export default {
 
 <style scoped>
 .game-wrap {
-  width: 200px;
-  height:200px;
+  width: 400px;
+  height:400px;
   background: black;
   position: fixed;
   left: 50%;

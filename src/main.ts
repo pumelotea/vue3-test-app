@@ -14,3 +14,4 @@ app.use(http)
 app.use(store)
 app.use(eventBus)
 app.mount('#app')
+

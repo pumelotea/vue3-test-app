@@ -26,8 +26,8 @@ export class AStarFindPath {
   public closeList:Array<Point> = []
   public openList:Array<Point> = []
   public maze:Array<Array<number>> = []
-  public gridWidth = 20
-  public gridHeight = 20
+  public gridWidth = 200
+  public gridHeight = 200
 
 
   public initMaze(obstruction:Array<Point>=[]){
