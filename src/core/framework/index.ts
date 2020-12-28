@@ -1,133 +1,19 @@
 import { reactive } from 'vue'
-import { uuid,deepClone } from '../utils'
+import { deepClone, uuid } from '../utils'
 import {
   HappyKitFramework,
   HappyKitFrameworkOption,
   HappyKitMenuEvent,
   HappyKitNavEvent,
-  LinkTarget,
   MenuAdapter,
   MenuItem,
-  MenuType
+  NavCloseType,
+  NavItem,
 } from '../types'
-const md5 = require('js-md5')
-
-function createEmptyMenuItem(): MenuItem {
-  return {
-    menuId: '',
-    name: '',
-    icon: '',
-    path: '',
-    view: '',
-    isRouter: false,
-    isKeepalive: false,
-    type: MenuType.MENU,
-    externalLink: false,
-    linkTarget: LinkTarget.TAB,
-    externalLinkAddress: '',
-    hide: false,
-    isHome: false,
-    permissionKey: '',
-    children: [],
-    routerPath: '',
-    menuPath: [],
-    breadcrumb: [],
-    buttonList: [],
-    buttonsMap: new Map<string, MenuItem>()
-  }
-}
-
-const defaultMenuAdapter: MenuAdapter<MenuItem> = {
-  convert(menuTree: any) {
-    const routeMappingList: Array<MenuItem> = []
-    const menuIdMappingMap = new Map<string, MenuItem>()
-    const menuTreeConverted: Array<MenuItem> = []
-
-    const menuTypeMap: any = {
-      menu: MenuType.MENU,
-      button: MenuType.BUTTON
-    }
-
-    const linkTargetMap: any = {
-      _tab: LinkTarget.TAB,
-      _self: LinkTarget.SELF,
-      _blank: LinkTarget.BLANK
-    }
-
-    const forEachTree = (tree: Array<any>, pNode?: MenuItem) => {
-      for (let i = 0; i < tree.length; i++) {
-        //创建新的节点
-        const treeNode = createEmptyMenuItem()
-        treeNode.menuId = uuid()
-        treeNode.name = tree[i].name || ''
-        treeNode.path = tree[i].path || ''
-        treeNode.view = tree[i].view || ''
-        treeNode.isRouter = tree[i].isRouter || false
-        treeNode.isKeepalive = tree[i].isKeepalive || false
-        treeNode.type = menuTypeMap[tree[i].type] || MenuType.MENU
-        treeNode.externalLink = tree[i].externalLink || ''
-        treeNode.linkTarget = linkTargetMap[tree[i].externalLink] || LinkTarget.TAB
-        treeNode.externalLinkAddress = tree[i].externalLinkAddress || ''
-        treeNode.hide = tree[i].hide || false
-        treeNode.isHome = tree[i].isHome || false
-        treeNode.permissionKey = tree[i].permissionKey || ''
-
-        if (!pNode) {
-          pNode = createEmptyMenuItem()
-          menuTreeConverted.push(pNode)
-        }
-        pNode.children.push(treeNode)
-        //拼接路由
-        treeNode.routerPath = pNode.routerPath + treeNode.path
-        //预先生成菜单节点路径
-        const tmpNode = deepClone(treeNode) as MenuItem
-        tmpNode.children = []
-        tmpNode.menuPath = []
-        tmpNode.breadcrumb = []
-        treeNode.menuPath = [...pNode.menuPath, tmpNode]
-        //breadcrumb
-        treeNode.breadcrumb = [...pNode.breadcrumb, tmpNode]
-
-        //记录id映射表
-        menuIdMappingMap.set(treeNode.menuId, treeNode)
-
-        if (treeNode.type === MenuType.MENU) {
-          if (!treeNode.isRouter) {
-            forEachTree(tree[i].children, treeNode)
-          } else {
-            //收集按钮
-            tree[i].children.forEach((e: any) => {
-              const btnNode = createEmptyMenuItem()
-              btnNode.menuId = uuid()
-              btnNode.name = e.name || ''
-              btnNode.path = e.path || ''
-              btnNode.view = e.view || ''
-              btnNode.isRouter = e.isRouter || false
-              btnNode.isKeepalive = e.isKeepalive || false
-              btnNode.type = menuTypeMap[e.type] || MenuType.MENU
-              btnNode.externalLink = e.externalLink || ''
-              btnNode.linkTarget = linkTargetMap[e.externalLink] || LinkTarget.TAB
-              btnNode.externalLinkAddress = e.externalLinkAddress || ''
-              btnNode.hide = e.hide || false
-              btnNode.isHome = e.isHome || false
-              btnNode.permissionKey = e.permissionKey || ''
-              treeNode.buttonList.push(btnNode)
-              treeNode.buttonsMap.set(btnNode.permissionKey, btnNode)
-            })
-            if (
-              !treeNode.externalLink ||
-              (treeNode.externalLink && treeNode.linkTarget === LinkTarget.TAB)
-            ) {
-              routeMappingList.push(treeNode)
-            }
-          }
-        }
-      }
-    }
-    forEachTree(menuTree as Array<any>)
-    return { routeMappingList, menuTreeConverted:menuTreeConverted[0].children, menuIdMappingMap }
-  }
-}
+import {
+  createDefaultMenuAdapter,
+  createDefaultPageIdFactory
+} from '../factory'
 
 /**
  * 创建核心框架
@@ -137,10 +23,10 @@ export function createHappyFramework(options?: any): HappyKitFramework {
 
   const frameworkInstance: HappyKitFramework = {
     options: {},
-    menuTree: reactive({value:[]}),
-    navigatorList: reactive({value:[]}),
-    routeMappingList: reactive({value:[]}),
-    menuIdMappingMap: reactive({value:new Map<string, MenuItem>()}),
+    menuTree: reactive({ value: [] }),
+    navigatorList: reactive({ value: [] }),
+    routeMappingList: reactive({ value: [] }),
+    menuIdMappingMap: reactive({ value: new Map<string, MenuItem>() }),
     currentMenuRoute: reactive({ value: null }),
     routerInitiated: false,
     tracker: {
@@ -148,15 +34,16 @@ export function createHappyFramework(options?: any): HappyKitFramework {
     },
     init(options?: HappyKitFrameworkOption) {
       this.options = options || {
-        menuAdapter:defaultMenuAdapter
+        menuAdapter: createDefaultMenuAdapter(),
+        pageIdFactory: createDefaultPageIdFactory()
       }
     },
     setMenuTree(rawData: any, dataAdapter?: MenuAdapter<MenuItem>) {
-      if (!dataAdapter){
+      if (!dataAdapter) {
         dataAdapter = this.options.menuAdapter
       }
 
-      if (!dataAdapter){
+      if (!dataAdapter) {
         console.error('MenuAdapter not found')
         return
       }
@@ -170,7 +57,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
       this.routeMappingList.value = routeMappingList
       this.menuIdMappingMap.value = menuIdMappingMap
     },
-    setCurrentMenuRoute(currentMenuRoute: MenuItem | null) {
+    setCurrentMenuRoute(currentMenuRoute: NavItem | null) {
       this.currentMenuRoute.value = currentMenuRoute
     },
     getMenuTree() {
@@ -188,7 +75,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
         if (!this.currentMenuRoute.value) {
           return []
         }
-        return this.currentMenuRoute.value.breadcrumb
+        return this.currentMenuRoute.value.menuItem.breadcrumb
       }
       //正常传递pageId的情况会根据pageId查找对应的菜单的面包屑
       const menuItems = this.navigatorList.value.filter(e => e.pageId == pageId)
@@ -210,22 +97,111 @@ export function createHappyFramework(options?: any): HappyKitFramework {
     getNavList() {
       return this.navigatorList
     },
-    isExistNav(pageId:string){
-      return this.navigatorList.value.filter(e=>e.pageId === pageId).length > 0
+    getNav(pageId:string){
+      const res = this.navigatorList.value.filter(e=>e.pageId === pageId)
+      return res.length>0?res[0]:null
     },
-    //TODO
-    openNav(menuItem: MenuItem, title?: string){
-      this.navigatorList.value.push({
-        pageId:'',
-        title:title || menuItem.name,
-        menuItem:menuItem
-      })
+    isExistNav(pageId: string) {
+      return this.navigatorList.value.filter(e => e.pageId === pageId).length > 0
     },
-    closeNav(type: string, pageId?: string, event?: HappyKitNavEvent) {
+    openNav(uniqueString: string, menuItem: MenuItem, title?: string) {
+      const pageId = this.options.pageIdFactory!.generate(uniqueString)
+      if (this.isExistNav(pageId)){
+        return this.getNav(pageId)
+      }
+      const newNav = {
+        pageId: pageId,
+        title: title || menuItem.name,
+        menuItem: menuItem
+      }
+      this.navigatorList.value.push(newNav)
+      return newNav
+    },
+    closeNav(type: NavCloseType, pageId?: string, event?: HappyKitNavEvent) {
+      switch (type) {
+        case NavCloseType.SELF: {
+          let pos = this.navigatorList.value.findIndex(e => e.pageId === pageId)
+          if (pos === -1) {
+            return
+          }
+          const res = this.navigatorList.value.splice(pos, 1)
+          //如果关闭的是正在激活的路由，需要倒退一个路由
+          const needNavs:Array<NavItem> = []
+          if (pageId === this.currentMenuRoute.value?.pageId){
+            let preIndex = 0
+            if (pos > 0) {
+              preIndex = pos - 1
+            }
+            const preNav = this.navigatorList.value[preIndex]
+            needNavs.push(preNav)
+            if (preNav){
+              this.setCurrentMenuRoute(preNav)
+            }
+          }
+          event && event(res,needNavs)
+          break
+        }
+        case NavCloseType.LEFT: {
+          let pos = this.navigatorList.value.findIndex(e => e.pageId === this.currentMenuRoute.value?.pageId)
+          if (pos === -1) {
+            return
+          }
+          const res = this.navigatorList.value.splice(0, pos)
+          event && event(res,[])
+          break
+        }
+        case NavCloseType.RIGHT: {
+          let pos = this.navigatorList.value.findIndex(e => e.pageId === this.currentMenuRoute.value?.pageId)
+          if (pos === -1) {
+            return
+          }
+          const res = this.navigatorList.value.splice(pos + 1, this.navigatorList.value.length - pos)
+          event && event(res,[])
+          break
+        }
+        case NavCloseType.ALL: {
+          const res = [...this.navigatorList.value]
+          this.navigatorList.value = []
+          event && event(res,[])
+          break
+        }
+        case NavCloseType.OTHER: {
+          const res: Array<NavItem> = []
+          let tmp = null
+          this.navigatorList.value.forEach(e => {
+            if (e.pageId !== this.currentMenuRoute.value?.pageId) {
+              res.push(e)
+            } else {
+              tmp = e
+            }
+          })
+          if (tmp) {
+            this.navigatorList.value = [tmp as NavItem]
+          }
+          event && event(res,[])
+          break
+        }
+      }
+      if (this.navigatorList.value.length === 0){
+        this.setCurrentMenuRoute(null)
+      }
     },
     clickNavItem(pageId: string, event?: HappyKitNavEvent) {
+      let res = this.navigatorList.value.filter(e => e.pageId === pageId)
+      if (res.length === 0) {
+        return
+      }
+      this.setCurrentMenuRoute(this.getNav(pageId))
+      event && event([],res)
     },
     clickMenuItem(menuId: string, event?: HappyKitMenuEvent) {
+      let res = this.routeMappingList.value.filter(e => e.menuId === menuId)
+      if (res.length === 0) {
+        return
+      }
+      //打开并且激活到当前导航项
+      this.setCurrentMenuRoute(this.openNav(menuId,res[0]))
+      event && event(res)
     }
   }
   frameworkInstance.init(options)
