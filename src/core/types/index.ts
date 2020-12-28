@@ -34,7 +34,7 @@ export const enum NavCloseType {
 /**
  * 菜单数据结构
  */
-export declare interface MenuItem {
+export interface MenuItem {
   /**
    * 必须要有的数据
    */

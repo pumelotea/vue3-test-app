@@ -12,7 +12,7 @@
     <button @click="closeNav(2)">关闭右侧 </button>
     <button @click="closeNav(3)">关闭其他 </button>
     <div v-for="e in navList.value" :key="e.pageId">
-      <button @click="closeNav(4,e.pageId)">CLOSE</button> <a @click="navClick(e.pageId)">{{e.title}}</a>
+      <button @click="closeNav(4,e.pageId)">CLOSE</button> <a :style="currentRouteMenu.value?.pageId===e.pageId?'color:red':''" @click="navClick(e.pageId)">{{e.title}}</a>
     </div>
   </div>
 </template>
