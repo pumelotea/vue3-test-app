@@ -1,6 +1,15 @@
-import { HappyKitFramework, LinkTarget, MenuAdapter, MenuItem, MenuType, PageIdFactory } from '../types'
+import {
+  HappyKitFramework,
+  LinkTarget,
+  MenuAdapter,
+  MenuItem,
+  MenuType,
+  PageIdFactory,
+  RouterInjectOption,
+  HAPPYKIT_INJECT
+} from '../types'
 import { deepClone, uuid } from '../utils'
-import {RouteLocationRaw ,Router} from 'vue-router'
+import { RouteLocationRaw, Router, RouteRecordRaw } from 'vue-router'
 
 const md5 = require('js-md5')
 
@@ -132,19 +141,61 @@ export function createDefaultMenuAdapter(): MenuAdapter<MenuItem> {
   }
 }
 
-export function createDefaultPageIdFactory(framework:HappyKitFramework): PageIdFactory {
+export function createDefaultPageIdFactory(framework: HappyKitFramework): PageIdFactory {
   return {
-    framework:framework,
+    framework: framework,
     generate(fullPath: string) {
       return md5(fullPath)
     },
-    getNextPageId(to:RouteLocationRaw){
-      const router:Router = this.framework.options.app?.config.globalProperties.$router
-      if (!router){
+    getNextPageId(to: RouteLocationRaw) {
+      const router: Router = this.framework.options.app?.config.globalProperties.$router
+      if (!router) {
         throw Error('getNextPageId:router instance is null')
       }
       const route = router.resolve(to)
       return this.generate(route.fullPath)
     }
   }
+}
+
+/**
+ * 动态路由注入
+ * @param options
+ */
+export function injectRoutes(options: RouterInjectOption) {
+  const parentName = options.parentRoute.name
+  if (!parentName) {
+    throw Error('RouterInjectOption:parentRoute name is undefined')
+  }
+
+  //删除路由
+  if (options.router.hasRoute(parentName)) {
+    options.router.removeRoute(parentName)
+  }
+
+  if (options.parentRoute.meta) {
+    options.parentRoute.meta._source = HAPPYKIT_INJECT
+  } else {
+    options.parentRoute.meta = {
+      _source: HAPPYKIT_INJECT
+    }
+  }
+
+  //注入父级路由
+  options.router.addRoute(options.parentRoute)
+
+  options.routes.forEach(e => {
+    const route = {
+      path: e.routerPath,
+      name: e.name,
+      component: () => import(`${options.componentRootPath}${e.view}`),
+      meta: {
+        _source: HAPPYKIT_INJECT,
+        isKeepalive: e.isKeepalive,
+        menuId: e.menuId,
+        externalLinkAddress: e.externalLinkAddress
+      }
+    }
+    options.router.addRoute(parentName, route)
+  })
 }

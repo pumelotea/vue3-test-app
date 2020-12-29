@@ -123,6 +123,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
       const newNav = {
         pageId: nextPageId,
         title: title || menuItem.name,
+        to:to,
         menuItem: menuItem
       }
       this.navigatorList.value.push(newNav)

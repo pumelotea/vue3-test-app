@@ -1,8 +1,10 @@
 /**
  * 框架接口
  */
-import {App} from 'vue'
-import { RouteLocationRaw } from 'vue-router'
+import { App } from 'vue'
+import { Router, RouteRecordRaw } from 'vue-router'
+
+export const HAPPYKIT_INJECT = 'HAPPYKIT_INJECT'
 
 /**
  * 菜单类型
@@ -106,6 +108,8 @@ export interface NavItem {
   pageId: string
   //页面名称；不一定会使用菜单名称，可以是自定义的名称
   title: string
+  //跳转目标
+  to: any
   //对应的菜单节点
   menuItem: MenuItem
 }
@@ -153,18 +157,19 @@ export interface CurrentMenuRoute {
  * 页面id工厂结构
  */
 export interface PageIdFactory {
-  framework:HappyKitFramework
+  framework: HappyKitFramework
   generate: (uniqueString: string) => string
-  getNextPageId: (to:any)=> string
+  getNextPageId: (to: any) => string
 }
 
 /**
  * 核心框架选项数据结构
  */
 export interface HappyKitFrameworkOption {
-  app?:App
+  app?: App
   menuAdapter?: MenuAdapter<MenuItem>
   pageIdFactory?: PageIdFactory
+
   [propName: string]: any
 }
 
@@ -312,7 +317,14 @@ export interface HappyKitFramework {
    * vue插件方法
    * @param app
    */
-  install:(app:App) => void
+  install: (app: App) => void
+}
+
+export interface RouterInjectOption {
+  parentRoute: RouteRecordRaw
+  router: Router
+  routes: Array<MenuItem>
+  componentRootPath: string
 }
 
 
