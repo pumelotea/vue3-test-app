@@ -1,4 +1,4 @@
-import { reactive } from 'vue'
+import { reactive,App } from 'vue'
 import { deepClone, uuid } from '../utils'
 import {
   HappyKitFramework,
@@ -32,11 +32,16 @@ export function createHappyFramework(options?: any): HappyKitFramework {
     tracker: {
       clientId: ''
     },
+    install(app:App){
+      this.options.app = app
+      app.config.globalProperties.$happykit = this
+    },
     init(options?: HappyKitFrameworkOption) {
       this.options = options || {
         menuAdapter: createDefaultMenuAdapter(),
-        pageIdFactory: createDefaultPageIdFactory()
+        pageIdFactory: createDefaultPageIdFactory(this)
       }
+      this.initTracker()
     },
     setMenuTree(rawData: any, dataAdapter?: MenuAdapter<MenuItem>) {
       if (!dataAdapter) {
@@ -44,8 +49,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
       }
 
       if (!dataAdapter) {
-        console.error('MenuAdapter not found')
-        return
+        throw Error('MenuAdapter not found')
       }
 
       const {
@@ -87,6 +91,10 @@ export function createHappyFramework(options?: any): HappyKitFramework {
     getTracker() {
       return this.tracker
     },
+    initTracker() {
+      const id = localStorage.getItem('clientId')
+      this.tracker.clientId = id || this.refreshClientId()
+    },
     refreshClientId() {
       const id = uuid()
       this.tracker.clientId = id
@@ -104,13 +112,16 @@ export function createHappyFramework(options?: any): HappyKitFramework {
     isExistNav(pageId: string) {
       return this.navigatorList.value.filter(e => e.pageId === pageId).length > 0
     },
-    openNav(uniqueString: string, menuItem: MenuItem, title?: string) {
-      const pageId = this.options.pageIdFactory!.generate(uniqueString)
-      if (this.isExistNav(pageId)){
-        return this.getNav(pageId)
+    openNav(to:any, menuItem: MenuItem, title?:string) {
+      const nextPageId = this.options.pageIdFactory?.getNextPageId(to)
+      if (!nextPageId){
+        return null
+      }
+      if (this.isExistNav(nextPageId)){
+        return this.getNav(nextPageId)
       }
       const newNav = {
-        pageId: pageId,
+        pageId: nextPageId,
         title: title || menuItem.name,
         menuItem: menuItem
       }
@@ -199,8 +210,8 @@ export function createHappyFramework(options?: any): HappyKitFramework {
       if (res.length === 0) {
         return
       }
-      //打开并且激活到当前导航项
-      this.setCurrentMenuRoute(this.openNav(menuId,res[0]))
+      const navItem = this.openNav({path:res[0].routerPath},res[0])
+      this.setCurrentMenuRoute(navItem)
       event && event(res)
     }
   }

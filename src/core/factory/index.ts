@@ -1,5 +1,6 @@
-import { LinkTarget, MenuAdapter, MenuItem, MenuType, PageIdFactory } from '../types'
+import { HappyKitFramework, LinkTarget, MenuAdapter, MenuItem, MenuType, PageIdFactory } from '../types'
 import { deepClone, uuid } from '../utils'
+import {RouteLocationRaw ,Router} from 'vue-router'
 
 const md5 = require('js-md5')
 
@@ -131,10 +132,19 @@ export function createDefaultMenuAdapter(): MenuAdapter<MenuItem> {
   }
 }
 
-export function createDefaultPageIdFactory(): PageIdFactory {
+export function createDefaultPageIdFactory(framework:HappyKitFramework): PageIdFactory {
   return {
-    generate(uniqueString: string) {
-      return md5(uniqueString)
+    framework:framework,
+    generate(fullPath: string) {
+      return md5(fullPath)
+    },
+    getNextPageId(to:RouteLocationRaw){
+      const router:Router = this.framework.options.app?.config.globalProperties.$router
+      if (!router){
+        throw Error('getNextPageId:router instance is null')
+      }
+      const route = router.resolve(to)
+      return this.generate(route.fullPath)
     }
   }
 }

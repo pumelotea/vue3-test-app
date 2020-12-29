@@ -1,7 +1,8 @@
 /**
  * 框架接口
  */
-
+import {App} from 'vue'
+import { RouteLocationRaw } from 'vue-router'
 
 /**
  * 菜单类型
@@ -65,7 +66,7 @@ export interface MenuItem {
   //是否为主页
   isHome: boolean
   //权限key
-  permissionKey:string
+  permissionKey: string
   //子级菜单
   children: Array<MenuItem>
 
@@ -121,9 +122,9 @@ export interface Adapter<T> {
  */
 export interface MenuAdapter<T> {
   convert: (rawData: any) => {
-    routeMappingList:T[],
-    menuTreeConverted:T[],
-    menuIdMappingMap:Map<string, T>
+    routeMappingList: T[],
+    menuTreeConverted: T[],
+    menuIdMappingMap: Map<string, T>
   }
 }
 
@@ -131,7 +132,7 @@ export interface MenuAdapter<T> {
  * 导航项相关事件
  */
 export interface HappyKitNavEvent {
-  (removedNavs: Array<NavItem>,needNavs: Array<NavItem>): void
+  (removedNavs: Array<NavItem>, needNavs: Array<NavItem>): void
 }
 
 /**
@@ -152,15 +153,18 @@ export interface CurrentMenuRoute {
  * 页面id工厂结构
  */
 export interface PageIdFactory {
-  generate:(uniqueString:string)=>string
+  framework:HappyKitFramework
+  generate: (uniqueString: string) => string
+  getNextPageId: (to:any)=> string
 }
 
 /**
  * 核心框架选项数据结构
  */
 export interface HappyKitFrameworkOption {
-  menuAdapter?:MenuAdapter<MenuItem>,
-  pageIdFactory?:PageIdFactory
+  app?:App
+  menuAdapter?: MenuAdapter<MenuItem>
+  pageIdFactory?: PageIdFactory
   [propName: string]: any
 }
 
@@ -172,31 +176,31 @@ export interface HappyKitFramework {
   /**
    * 初始化属性
    */
-  options:HappyKitFrameworkOption
+  options: HappyKitFrameworkOption
   /**
    * 菜单树
    */
   menuTree: {
-    value:Array<MenuItem>
+    value: Array<MenuItem>
   }
   /**
    * 导航列表
    */
   navigatorList: {
-    value:Array<NavItem>
+    value: Array<NavItem>
   }
   /**
    * 路由列表
    */
   routeMappingList: {
-    value:Array<MenuItem>
+    value: Array<MenuItem>
   }
   /**
    * 菜单id映射表
    * 提高查找速度
    */
   menuIdMappingMap: {
-    value:Map<string, MenuItem>
+    value: Map<string, MenuItem>
   }
   /**
    * 当前路由
@@ -210,7 +214,6 @@ export interface HappyKitFramework {
    * 客户端追踪器
    */
   tracker: Tracker
-
   /**
    * 初始化器
    * @param options
@@ -231,13 +234,13 @@ export interface HappyKitFramework {
    * 获取菜单树
    */
   getMenuTree: () => {
-    value:Array<MenuItem>
+    value: Array<MenuItem>
   }
   /**
    * 获取路由列表
    */
   getRouteMappingList: () => {
-    value:Array<MenuItem>
+    value: Array<MenuItem>
   }
   /**
    * 获取当前菜单路由
@@ -253,6 +256,10 @@ export interface HappyKitFramework {
    */
   getTracker: () => Tracker
   /**
+   * 初始化追踪器
+   */
+  initTracker: () => void
+  /**
    * 刷新客户端id
    */
   refreshClientId: () => string
@@ -260,25 +267,27 @@ export interface HappyKitFramework {
    * 获取导航列表
    */
   getNavList: () => {
-    value:Array<NavItem>
+    value: Array<NavItem>
   }
-  getNav: (pageId:string) => NavItem | null
+  getNav: (pageId: string) => NavItem | null
   /**
    * 是否存在该导航项
    * @param pageId
    */
-  isExistNav:(pageId:string) => boolean
+  isExistNav: (pageId: string) => boolean
   /**
-   * 打开导航项
+   * 打开新的导航项
    *
-   * 需要一个唯一字符串，该字符串和当前打开的页面是一一对应的；
-   * 建议使用路由的fullPath
-   * @param uniqueString
+   * #case1:
+   * 同一个路由，只能打开一个页面
+   * #case2:
+   * 同一个路由，打开多个页面，不同参数
+   *
+   * @param to 前往目标
    * @param menuItem
-   * 可选的标题
-   * @param title
+   * @param title 可选的标题
    */
-  openNav: (uniqueString:string,menuItem:MenuItem,title?:string) => NavItem | null
+  openNav: (to: any, menuItem: MenuItem, title?: string) => NavItem | null
   /**
    * 关闭导航项
    * @param type
@@ -298,6 +307,12 @@ export interface HappyKitFramework {
    * @param event
    */
   clickMenuItem: (menuId: string, event?: HappyKitMenuEvent) => void
+
+  /**
+   * vue插件方法
+   * @param app
+   */
+  install:(app:App) => void
 }
 
 
