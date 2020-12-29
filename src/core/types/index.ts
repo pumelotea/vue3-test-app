@@ -5,6 +5,8 @@ import { App } from 'vue'
 import { Router, RouteRecordRaw } from 'vue-router'
 
 export const HAPPYKIT_INJECT = 'HAPPYKIT_INJECT'
+export const HAPPYKIT_LOCAL_STORAGE = 'HAPPYKIT_LOCAL_STORAGE'
+export const NAV_TITLE = 'NAV_TITLE'
 
 /**
  * 菜单类型

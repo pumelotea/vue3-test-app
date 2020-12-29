@@ -1,19 +1,31 @@
 import { reactive,App } from 'vue'
 import { deepClone, uuid } from '../utils'
 import {
+  HAPPYKIT_LOCAL_STORAGE,
   HappyKitFramework,
   HappyKitFrameworkOption,
   HappyKitMenuEvent,
   HappyKitNavEvent,
   MenuAdapter,
-  MenuItem,
+  MenuItem, NAV_TITLE,
   NavCloseType,
-  NavItem,
+  NavItem
 } from '../types'
 import {
   createDefaultMenuAdapter,
   createDefaultPageIdFactory
 } from '../factory'
+
+
+/**
+ * 清除缓存中的导航项名称
+ * @param list
+ */
+const clearNavTitleLocalStorage = (list:Array<NavItem>)=>{
+  list.forEach(e=>{
+    localStorage.removeItem(`${HAPPYKIT_LOCAL_STORAGE}/${NAV_TITLE}/${e.pageId}`)
+  })
+}
 
 /**
  * 创建核心框架
@@ -127,6 +139,10 @@ export function createHappyFramework(options?: any): HappyKitFramework {
         menuItem: menuItem
       }
       this.navigatorList.value.push(newNav)
+
+      //持久化页面对应的标题
+      localStorage.setItem(`${HAPPYKIT_LOCAL_STORAGE}/${NAV_TITLE}/${newNav.pageId}`,newNav.title)
+
       return newNav
     },
     closeNav(type: NavCloseType, pageId?: string, event?: HappyKitNavEvent) {
@@ -150,6 +166,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
               this.setCurrentMenuRoute(preNav)
             }
           }
+          clearNavTitleLocalStorage(res)
           event && event(res,needNavs)
           break
         }
@@ -159,6 +176,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
             return
           }
           const res = this.navigatorList.value.splice(0, pos)
+          clearNavTitleLocalStorage(res)
           event && event(res,[])
           break
         }
@@ -168,12 +186,14 @@ export function createHappyFramework(options?: any): HappyKitFramework {
             return
           }
           const res = this.navigatorList.value.splice(pos + 1, this.navigatorList.value.length - pos)
+          clearNavTitleLocalStorage(res)
           event && event(res,[])
           break
         }
         case NavCloseType.ALL: {
           const res = [...this.navigatorList.value]
           this.navigatorList.value = []
+          clearNavTitleLocalStorage(res)
           event && event(res,[])
           break
         }
@@ -190,6 +210,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
           if (tmp) {
             this.navigatorList.value = [tmp as NavItem]
           }
+          clearNavTitleLocalStorage(res)
           event && event(res,[])
           break
         }
