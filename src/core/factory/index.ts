@@ -182,8 +182,7 @@ export function injectRoutes(options: RouterInjectOption) {
     const route = {
       path: e.routerPath,
       name: e.name,
-      component: () => import(`@/${options.componentRootPath}${e.view}`),
-      // component: () => import(`@/views/dashboard/index.vue`!),
+      component:options.viewLoader(e.view),
       meta: {
         _source: HAPPYKIT_INJECT,
         isKeepalive: e.isKeepalive,

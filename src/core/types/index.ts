@@ -345,7 +345,7 @@ export interface RouterInjectOption {
   parentRoute: RouteRecordRaw
   router: Router
   routes: Array<MenuItem>
-  componentRootPath: string
+  viewLoader: (view:string)=>any
 }
 
 /**

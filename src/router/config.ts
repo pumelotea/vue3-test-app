@@ -5,7 +5,6 @@ import happyFramework from '@/framework'
 // @ts-ignore
 import routerData from '@/core/data/routerData'
 
-
 const beforeInterceptor = createDefaultRouterInterceptor({
   interceptorType:RouterInterceptorType.BEFORE,
   framework:happyFramework,
@@ -23,7 +22,9 @@ const beforeInterceptor = createDefaultRouterInterceptor({
     },
     router: happyFramework.options.app?.config.globalProperties.$router,
     routes: [],
-    componentRootPath: 'views'
+    viewLoader(view){
+      return ()=>import(`@/views${view}`)
+    }
   }
 })
 const afterInterceptor = createDefaultRouterInterceptor({
