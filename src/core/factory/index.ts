@@ -15,11 +15,7 @@ const md5 = require('js-md5')
 
 /**
  * 工厂
- * 创建核心框架
- * 创建用户框架
- * 创建主题框架
- * 创建axios
- * 创建router
+ * 提供通用方法
  */
 
 export function createEmptyMenuItem(): MenuItem {
@@ -184,6 +180,7 @@ export function injectRoutes(options: RouterInjectOption) {
   //注入父级路由
   options.router.addRoute(options.parentRoute)
 
+  //注入子级路由
   options.routes.forEach(e => {
     const route = {
       path: e.routerPath,
