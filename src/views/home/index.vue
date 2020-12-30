@@ -67,6 +67,8 @@ export default {
         console.log('需要跳转3', needNavs)
         if (needNavs.length>0){
           router.push(needNavs[0].to)
+        }else{
+          router.push('/')
         }
       })
     }
