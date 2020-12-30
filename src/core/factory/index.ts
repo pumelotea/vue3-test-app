@@ -20,6 +20,9 @@ const md5 = require('js-md5')
  * 提供通用方法
  */
 
+/**
+ * 创建空的菜单项
+ */
 export function createEmptyMenuItem(): MenuItem {
   return {
     menuId: '',
@@ -45,6 +48,9 @@ export function createEmptyMenuItem(): MenuItem {
   }
 }
 
+/**
+ * 创建默认的菜单数据适配器
+ */
 export function createDefaultMenuAdapter(): MenuAdapter<MenuItem> {
   return {
     convert(menuTree: any) {
@@ -139,6 +145,10 @@ export function createDefaultMenuAdapter(): MenuAdapter<MenuItem> {
   }
 }
 
+/**
+ * 创建默认的页面ID生成工厂
+ * @param framework 框架上下文
+ */
 export function createDefaultPageIdFactory(framework: HappyKitFramework): PageIdFactory {
   return {
     framework: framework,
