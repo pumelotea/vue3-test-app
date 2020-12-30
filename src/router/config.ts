@@ -12,10 +12,13 @@ const beforeInterceptor = createDefaultRouterInterceptor({
   interceptorType:RouterInterceptorType.BEFORE,
   framework:happyFramework,
   dataLoader(){
+    //实际开发环境应该从服务端拉取数据
+    //同时应该根据实际的数据结构进行编写对应的适配器
+    //同时应该自行处理好请求失败等情况
     return routerData
   },
   dataLoadFailureHandler(){
-    console.log('dataLoadFailureHandler console')
+    console.log('数据加载失败')
   },
   routerInjectOption:{
     parentRoute: {
