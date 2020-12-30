@@ -2,7 +2,7 @@
  * 框架接口
  */
 import { App } from 'vue'
-import { Router, RouteRecordRaw } from 'vue-router'
+import { NavigationGuardNext, RouteLocationNormalized, Router, RouteRecordRaw } from 'vue-router'
 
 export const HAPPYKIT_INJECT = 'HAPPYKIT_INJECT'
 export const HAPPYKIT_LOCAL_STORAGE = 'HAPPYKIT_LOCAL_STORAGE'
@@ -34,6 +34,22 @@ export const enum NavCloseType {
   RIGHT,
   OTHER,
   ALL
+}
+
+/**
+ * 路由拦截类型
+ */
+export const enum RouterInterceptorType {
+  BEFORE,
+  AFTER
+}
+
+/**
+ * HTTP请求拦截类型
+ */
+export const enum HTTPInterceptorType {
+  BEFORE,
+  AFTER
 }
 
 /**
@@ -322,11 +338,33 @@ export interface HappyKitFramework {
   install: (app: App) => void
 }
 
+/**
+ * 路由注入选项
+ */
 export interface RouterInjectOption {
   parentRoute: RouteRecordRaw
   router: Router
   routes: Array<MenuItem>
   componentRootPath: string
+}
+
+/**
+ * 路由拦截器选项
+ */
+export interface RouterInterceptorOption {
+  framework:HappyKitFramework
+  interceptorType:RouterInterceptorType
+  dataLoader?:()=>any
+  dataLoadFailureHandler?:()=>void
+  routerInjectOption?:RouterInjectOption
+}
+
+/**
+ * 路由拦截器
+ */
+export interface RouterInterceptor {
+  options:RouterInterceptorOption
+  filter: (to: RouteLocationNormalized, from: RouteLocationNormalized,next?: NavigationGuardNext)=>void
 }
 
 

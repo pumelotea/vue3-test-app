@@ -1,5 +1,5 @@
 <template>
-  <div>dashboard</div>
+  <div>dashboard - {{$route.query.title}}</div>
 </template>
 
 <script>

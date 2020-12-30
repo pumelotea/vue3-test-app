@@ -1,4 +1,5 @@
 import {
+  HAPPYKIT_INJECT,
   HappyKitFramework,
   LinkTarget,
   MenuAdapter,
@@ -6,10 +7,11 @@ import {
   MenuType,
   PageIdFactory,
   RouterInjectOption,
-  HAPPYKIT_INJECT
+  RouterInterceptor, RouterInterceptorOption,
+  RouterInterceptorType
 } from '../types'
 import { deepClone, uuid } from '../utils'
-import { RouteLocationRaw, Router, RouteRecordRaw } from 'vue-router'
+import { RouteLocationRaw, Router } from 'vue-router'
 
 const md5 = require('js-md5')
 
@@ -164,11 +166,6 @@ export function injectRoutes(options: RouterInjectOption) {
     throw Error('RouterInjectOption:parentRoute name is undefined')
   }
 
-  //删除路由
-  if (options.router.hasRoute(parentName)) {
-    options.router.removeRoute(parentName)
-  }
-
   if (options.parentRoute.meta) {
     options.parentRoute.meta._source = HAPPYKIT_INJECT
   } else {
@@ -185,7 +182,8 @@ export function injectRoutes(options: RouterInjectOption) {
     const route = {
       path: e.routerPath,
       name: e.name,
-      component: () => import(`${options.componentRootPath}${e.view}`),
+      component: () => import(`@/${options.componentRootPath}${e.view}`),
+      // component: () => import(`@/views/dashboard/index.vue`!),
       meta: {
         _source: HAPPYKIT_INJECT,
         isKeepalive: e.isKeepalive,
@@ -193,6 +191,89 @@ export function injectRoutes(options: RouterInjectOption) {
         externalLinkAddress: e.externalLinkAddress
       }
     }
-    options.router.addRoute(parentName, route)
+    options.router.addRoute(parentName,route)
   })
+}
+
+/**
+ * 创建默认的路由拦截器
+ * @param options
+ */
+export function createDefaultRouterInterceptor(options:RouterInterceptorOption):RouterInterceptor{
+  if (options.interceptorType === RouterInterceptorType.BEFORE) {
+    return {
+      options,
+      async filter(to,from,next){
+        const framework = this.options.framework
+        console.log('RouterInterceptor Before: ',`${from.path} ---> ${to.path}`)
+
+        if (!next){
+          throw Error('RouterInterceptor:next is undefined')
+        }
+
+        //首次初始化
+        if (!framework.routerInitiated){
+          if (!this.options.dataLoader){
+            throw Error('RouterInterceptor:dataLoader is undefined')
+          }
+
+          //请求数据
+          const rawData = this.options.dataLoader()
+          //初始化失败
+          if (!rawData){
+            this.options.dataLoadFailureHandler && this.options.dataLoadFailureHandler()
+            return
+          }
+          //初始化核心数据
+          framework.setMenuTree(rawData)
+          //注入路由
+          if (this.options.routerInjectOption){
+            this.options.routerInjectOption.router = this.options.routerInjectOption.router ||
+              framework.options.app?.config.globalProperties.$router
+            this.options.routerInjectOption.routes.push(...framework.getRouteMappingList().value)
+            injectRoutes(this.options.routerInjectOption)
+          }
+          //初始化完成
+          framework.routerInitiated = true
+          console.log(
+            `%c HappyKit %c Core Data Loaded %c`,
+            'background:#35495e ; padding: 1px; border-radius: 3px 0 0 3px;  color: #fff',
+            'background:#20a0ff ; padding: 1px; border-radius: 0 3px 3px 0;  color: #fff',
+            'background:transparent'
+          )
+          //跳转到目标路由
+          console.log(framework.options.app?.config.globalProperties.$router.getRoutes())
+          // console.log(await framework.options.app?.config.globalProperties.$router.isReady())
+
+          next(to)
+          return
+        }
+
+        const menuId = to.meta['menuId']
+
+        //非菜单项直接跳转
+        if (!menuId){
+          next()
+          return
+        }
+        const res = framework.getRouteMappingList().value.filter(e=>e.menuId === menuId)
+        if (res.length === 0){
+          console.log('RouterInterceptor:MenuItem is not found, nav failed')
+          return
+        }
+        const menuItem = res[0]
+        //菜单项需要
+        const navItem = framework.openNav(to,menuItem)
+        framework.setCurrentMenuRoute(navItem)
+        next()
+      }
+    }
+  }else {
+    return {
+      options,
+      filter (to,from){
+        console.log('RouterInterceptor After: ',`${from.path} ---> ${to.path}`)
+      }
+    }
+  }
 }

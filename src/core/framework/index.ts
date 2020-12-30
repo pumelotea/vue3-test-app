@@ -132,9 +132,13 @@ export function createHappyFramework(options?: any): HappyKitFramework {
       if (this.isExistNav(nextPageId)){
         return this.getNav(nextPageId)
       }
+
+      //读取缓存中的对应标题
+      const cacheTitle = localStorage.getItem(`${HAPPYKIT_LOCAL_STORAGE}/${NAV_TITLE}/${nextPageId}`)
+
       const newNav = {
         pageId: nextPageId,
-        title: title || menuItem.name,
+        title: title || cacheTitle || menuItem.name,
         to:to,
         menuItem: menuItem
       }
@@ -153,6 +157,7 @@ export function createHappyFramework(options?: any): HappyKitFramework {
             return
           }
           const res = this.navigatorList.value.splice(pos, 1)
+          console.log(res)
           //如果关闭的是正在激活的路由，需要倒退一个路由
           const needNavs:Array<NavItem> = []
           if (pageId === this.currentMenuRoute.value?.pageId){
@@ -161,8 +166,8 @@ export function createHappyFramework(options?: any): HappyKitFramework {
               preIndex = pos - 1
             }
             const preNav = this.navigatorList.value[preIndex]
-            needNavs.push(preNav)
             if (preNav){
+              needNavs.push(preNav)
               this.setCurrentMenuRoute(preNav)
             }
           }

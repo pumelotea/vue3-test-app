@@ -5,8 +5,7 @@ import store from '@/store'
 import http from '@/apis'
 import {errorHandler,warnHandler} from '@/common/handlers.ts'
 import eventBus from '@/common/eventBus'
-import { createHappyFramework } from '@/core/framework'
-const happyFramework = createHappyFramework()
+import happyFramework from '@/framework'
 
 
 // @ts-ignore

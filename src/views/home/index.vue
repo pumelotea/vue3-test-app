@@ -1,95 +1,117 @@
 <template>
   <div>
-    Home-{{data.sum}}
-    <demo-com @demo-click="addAction" :name="String(count)">
-        <template v-slot:default="{xxx}">
-          {{xxx}}
-        </template>
-    </demo-com>
+    <p v-for="e in routeMappingList.value" :key="e.menuId">
+      <a @click="goto(e.menuId)">{{e.menuId}} - {{e.name}} - {{e.routerPath}}</a>
+    </p>
+    <p>面包屑</p>
+    <span>{{breadcrumb}}</span>
+    <p>当前路由</p>
+    <div v-if="currentRouteMenu.value">
+      【{{currentRouteMenu.value.title}}】
+    </div>
     <div>
-      <button @click="addAction">ADD {{count}}</button>
+      <button @click="openNav('dash-1111')">open1</button>
+      <button @click="openNav('dash-2222')">open2</button>
+      <button @click="openNav('dash-3333')">open3</button>
+    </div>
+    <button @click="closeNav(0)">关闭全部</button>
+    <button @click="closeNav(1)">关闭左侧</button>
+    <button @click="closeNav(2)">关闭右侧</button>
+    <button @click="closeNav(3)">关闭其他</button>
+    <div v-for="e in navList.value" :key="e.pageId">
+      <button @click="closeNav(4,e.pageId)">CLOSE</button>
+      <a :style="currentRouteMenu.value?.pageId===e.pageId?'color:red':''" @click="navClick(e.pageId)">{{e.title}}</a>
+    </div>
+    <div style="height: 500px;width: 400px;background: antiquewhite">
+      <router-view/>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import DemoCom from '@/components/DemoCom.vue'
-import {timeFormat,deepClone} from '@/common/utils'
 
-import { defineComponent } from 'vue'
-// eslint-disable-next-line no-unused-vars
-import { onMounted, getCurrentInstance, reactive, ref } from 'vue'
-
-export default defineComponent({
-  name: 'Home',
-  components: {
-    DemoCom
-  },
+import { computed, getCurrentInstance } from 'vue'
+// @ts-ignore
+import { HappyKitFramework, NavCloseType } from '@/core/types'
+// import { injectRoutes } from '@/core/factory'
+// @ts-ignore
+// import routerData from '@/core/data/routerData'
+export default {
   setup() {
     const self = getCurrentInstance()
     const ctx = (self as any).ctx
-    const count = ref(0)
-    const data = reactive({
-      sum: 0
+    const instance = ctx.$happykit as HappyKitFramework
+
+    const menuTree = instance.getMenuTree()
+    const routeMappingList = instance.getRouteMappingList()
+    const currentRouteMenu = instance.getCurrentMenuRoute()
+    const navList = instance.getNavList()
+
+    const breadcrumb = computed(() => {
+      return currentRouteMenu.value?.menuItem.breadcrumb.map((e: any) => e.name).join('/')
     })
 
-    const addAction = (event: any) => {
-      console.log(event)
-      count.value++
-      data.sum += count.value
+    const router = ctx.$router
 
-      ctx.$bus.emit('ok','asdjaksjdkjajskd')
+    const goto = (menuId: string) => {
+      instance.clickMenuItem(menuId, (menuItems: any) => {
+        console.log('需要跳转1', menuItems)
+        router.push(menuItems[0].routerPath)
+      })
     }
 
-    onMounted(async () => {
-      ctx.$bus.on('ok',(msg:any)=>console.log(msg))
-      // await ctx.$api.login("123123","123123")
-
-      let time = new Date()
-      console.log(timeFormat(time),'==========',time)
-      console.log(timeFormat('2020/11/18 10:37:51'),'==========','2020/11/18 10:37:51')
-      console.log(timeFormat('2020-11-18 10:37:51'),'==========','2020-11-18 10:37:51')
-      console.log(timeFormat(time.toDateString()),'==========',time.toDateString())
-      console.log(timeFormat(time.toISOString()),'==========',time.toISOString())
-      console.log(timeFormat(time.toLocaleDateString()),'==========',time.toLocaleDateString())
-      console.log(timeFormat(time.toLocaleString()),'==========',time.toLocaleString())
-      console.log(timeFormat(time.toTimeString()),'==========',time.toTimeString())
-      console.log(timeFormat(time.getTime()),'==========',time.getTime())
-      console.log(timeFormat(time.toString()),'==========',time.toString())
-
-
-      let a = {
-        a:1,
-        b:2,
-        c:3,
-        d:{
-          a:{
-            d:'123'
-          }
+    const tp: any = [NavCloseType.ALL, NavCloseType.LEFT, NavCloseType.RIGHT, NavCloseType.OTHER, NavCloseType.SELF]
+    const closeNav = (type: number, pageId?: string) => {
+      instance.closeNav(tp[type], pageId, (removedNavs: any, needNavs: any) => {
+        console.log('已经移除1', removedNavs)
+        console.log('需要跳转3', needNavs)
+        if (needNavs.length>0){
+          router.push(needNavs[0].to)
         }
-      }
-      const c = a
-      const b = deepClone(a)
-      console.log(b === a,c===a)
-      console.log(b)
-      console.log(a)
-      console.log(JSON.stringify(a) === JSON.stringify(b))
+      })
+    }
 
-    })
+    const navClick = (pageId: string) => {
+      instance.clickNavItem(pageId, (a: any, needNavs: any) => {
+        console.log('需要跳转2', needNavs)
+        if (needNavs.length>0){
+          router.push(needNavs[0].to)
+        }
+      })
+    }
+
+    const openNav = (title: string) => {
+      const node = instance.openNav('/dashboard?id=1&title=' + title, routeMappingList.value[0], title)
+      instance.setCurrentMenuRoute(node)
+      console.log('需要跳转4', node)
+      router.push(node.to)
+
+    }
 
     return {
-      count,
-      data,
-      addAction
+      menuTree,
+      navList,
+      routeMappingList,
+      currentRouteMenu,
+      breadcrumb,
+      goto,
+      closeNav,
+      navClick,
+      openNav
     }
   }
-})
+}
 </script>
+<style>
+p {
+  margin: 0;
+}
 
-<style lang="scss" scoped>
-.aa {
-  .v {
-    color: aliceblue;
-  }
+a {
+  cursor: pointer;
+}
+
+a:hover {
+  color: blue;
 }
 </style>
