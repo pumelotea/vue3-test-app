@@ -342,9 +342,23 @@ export interface HappyKitFramework {
  * 路由注入选项
  */
 export interface RouterInjectOption {
+  /**
+   * 父级路由
+   * 子路由全部注入在该路由下
+   */
   parentRoute: RouteRecordRaw
+  /**
+   * 待注入的路由实例
+   */
   router: Router
+  /**
+   * 待注入的路由数组
+   */
   routes: Array<MenuItem>
+  /**
+   * 视图组件加载器
+   * @param view
+   */
   viewLoader: (view:string)=>any
 }
 
@@ -352,10 +366,27 @@ export interface RouterInjectOption {
  * 路由拦截器选项
  */
 export interface RouterInterceptorOption {
+  /**
+   * 框架实例
+   * 作为上下文
+   */
   framework:HappyKitFramework
+  /**
+   * 路由拦截类型
+   */
   interceptorType:RouterInterceptorType
+  /**
+   * 数据加载器
+   */
   dataLoader?:()=>any
+  /**
+   * 数据加载失败回调
+   */
   dataLoadFailureHandler?:()=>void
+  /**
+   * 路由注入参数
+   * 用于拦截时需要注入的情况
+   */
   routerInjectOption?:RouterInjectOption
 }
 
@@ -363,7 +394,16 @@ export interface RouterInterceptorOption {
  * 路由拦截器
  */
 export interface RouterInterceptor {
+  /**
+   * 路由拦截参数
+   */
   options:RouterInterceptorOption
+  /**
+   * 拦截方法
+   * @param to
+   * @param from
+   * @param next
+   */
   filter: (to: RouteLocationNormalized, from: RouteLocationNormalized,next?: NavigationGuardNext)=>void
 }
 
