@@ -174,8 +174,12 @@ export function injectRoutes(options: RouterInjectOption) {
     }
   }
 
+  if (!options.router){
+    throw Error('RouterInjectOption:router is undefined')
+  }
+
   //注入父级路由
-  options.router.addRoute(options.parentRoute)
+  options.router!.addRoute(options.parentRoute)
 
   //注入子级路由
   options.routes.forEach(e => {
@@ -190,7 +194,7 @@ export function injectRoutes(options: RouterInjectOption) {
         externalLinkAddress: e.externalLinkAddress
       }
     }
-    options.router.addRoute(parentName,route)
+    options.router!.addRoute(parentName,route)
   })
 }
 

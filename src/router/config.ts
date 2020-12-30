@@ -20,7 +20,6 @@ const beforeInterceptor = createDefaultRouterInterceptor({
       path: '/home',
       component: () => import('@/views/home'!)
     },
-    router: happyFramework.options.app?.config.globalProperties.$router,
     routes: [],
     viewLoader(view){
       return ()=>import(`@/views${view}`)

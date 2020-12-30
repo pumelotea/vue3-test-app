@@ -350,7 +350,7 @@ export interface RouterInjectOption {
   /**
    * 待注入的路由实例
    */
-  router: Router
+  router?: Router
   /**
    * 待注入的路由数组
    */
