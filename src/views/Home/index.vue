@@ -1,10 +1,10 @@
 <template>
-  <div>dashboard - {{$route.query.title}}</div>
+  <div>123123</div>
 </template>
 
 <script>
 export default {
-  name: 'index'
+  name: "index"
 }
 </script>
 
